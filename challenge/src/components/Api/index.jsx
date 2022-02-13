@@ -24,7 +24,6 @@ const Api = ({ name }) => {
                     .catch(error => {
                         if(error.response) {
                         // Cuando el código de estado de la respuesta está fuera del rango 2xxx 
-                        console.log(error.response.status)
                         setError(`Error ${error.response.status}`)
                         } else if (error.request) {
                             // Cuando no se ha recibido ninguan respuesta despues de haber enviado la request 
@@ -42,9 +41,14 @@ const Api = ({ name }) => {
                 console.warn("Esto es un error:", error);
             }
         };
-        fetchData();
 
-    }, [load, setCheck]);
+        fetchData()
+
+        setInterval(() => {
+            fetchData()
+        }, 15000)
+
+    }, [load]);
     // ---------------------
 
     return (

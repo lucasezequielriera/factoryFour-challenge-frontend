@@ -26,12 +26,9 @@ const APIS = [
 export const DataProvider = ({ children }) => {
 
     const [apiNames, setApiNames] = useState(APIS);
-    const [apiData, setApiData] = useState([])
 
     return(
-        <DataContext.Provider value={{
-            apiNames, setApiNames, apiData, setApiData
-        }}>
+        <DataContext.Provider value={{ apiNames, setApiNames }}>
             {children}
         </DataContext.Provider>
     )

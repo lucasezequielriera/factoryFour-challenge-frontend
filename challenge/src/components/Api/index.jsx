@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Tag } from 'antd'
+import { Tag, Divider } from 'antd'
 import { CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import Axios from 'axios'
 
-const Api = ({ name }) => {
+const Api = ({ name, reload, setReload }) => {
 
     const [load, setLoad] = useState(false);
     const [data, setData] = useState([])
@@ -15,11 +15,12 @@ const Api = ({ name }) => {
     useEffect(() => {
 
         const fetchData = async () => {
+            setLoad(true)
             try {
                 await Axios.get(`https://api.factoryfour.com/${name}/health/status`)
                     .then(response => {
                         setAllData(response)
-                        setData(response.data)
+                        setData(response.data.hostname)
                     })
                     .catch(error => {
                         if(error.response) {
@@ -34,28 +35,36 @@ const Api = ({ name }) => {
                         }
                     }
                 );
-
-                setCheck(data.hostname)
-                setLoad(true)
             } catch (error) {
                 console.warn("Esto es un error:", error);
             }
-        };
+            setLoad(false)
+            setReload(false)
+        }
 
         fetchData()
 
-        setInterval(() => {
-            fetchData()
-        }, 15000)
-
-    }, [load]);
+    }, [reload]);
     // ---------------------
 
+    console.log(allData)
+
     return (
-        <div style={{ display: 'flex', width: 600, backgroundColor: 'white', border: '1px solid transparent', boxShadow: '0px 0px 10px grey', borderRadius: 5, padding: 20, justifyContent: 'space-between', alignItems: 'center', margin: '5px 5px' }}>
-            <p style={{ marginBottom: 0, fontSize: 17, fontWeight: 500 }}>{name}</p>
-            <Tag icon={ (check && allData.status) ? <CheckCircleOutlined /> : (error ? <CloseCircleOutlined /> : <ClockCircleOutlined />) } color={ (check && allData.status) ? "success" : (error ? "error" : "default") } style={{ padding: '3px 25px', fontSize: 15 }}>
-                {(check && allData.status) ? "Operational" : `${error ? error : 'Loading'}`}
+        <div style={{ display: 'flex', width: 600, backgroundColor: 'white', border: '1px solid transparent', boxShadow: '0px 0px 10px grey', borderRadius: 5, padding: 10, justifyContent: 'space-between', alignItems: 'center', margin: '5px 5px' }}>
+            <header style={{ display: 'flex' }}>
+                <div style={{ display: 'flex' }}>
+                    <p style={{ marginBottom: 0, fontSize: 17, fontWeight: 500, alignSelf: 'center', width: 100 }}>{name}</p>
+                    <Divider type="vertical" style={{ height: 45 }} />
+                </div>
+                <div>
+                    <p style={{ marginBottom: 0, fontSize: 10, fontWeight: 700 }}>host: <span style={{ fontWeight: 400 }}>{allData?.data?.hostname ? allData?.data?.hostname : "-"}</span></p>
+                    <p style={{ marginBottom: 0, fontSize: 10, fontWeight: 700 }}>message: <span style={{ fontWeight: 400 }}>{allData?.data?.message ? allData?.data?.message : "-"}</span></p>
+                    <p style={{ marginBottom: 0, fontSize: 10, fontWeight: 700 }}>time: <span style={{ fontWeight: 400 }}>{allData?.data?.time ? allData?.data?.time : "-"}</span></p>
+                </div>
+            </header>
+            <Tag icon={ (check && allData.status) ? <CheckCircleOutlined /> : (error ? <CloseCircleOutlined /> : <ClockCircleOutlined />) }
+            color={ allData.status === 200 && !reload ? "success" : error && !reload ? "error" : "default" } style={{ padding: '3px 25px', fontSize: 15 }}>
+                { allData.status === 200 && !reload ? "Operational" : `${error && !reload ? error : 'Loading'}` }
                 
             </Tag>
         </div>
